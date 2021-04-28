@@ -1,0 +1,8 @@
+version: "3.8"
+services:
+  node:
+    image: node:12
+    user: node
+    volumes:
+      - ./:/var/www/jmapper
+    working_dir: /var/www/jmapper

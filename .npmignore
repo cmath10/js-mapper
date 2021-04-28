@@ -1,0 +1,14 @@
+.cache
+.env
+.env.dist
+.gitignore
+.idea
+.idea.config.js
+.npmignore
+declaration.tsconfig.json
+docker-compose.yml
+jest.config.ts
+Makefile
+/coverage
+/src
+/tests
