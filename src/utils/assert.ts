@@ -1,5 +1,5 @@
 const fail = (message: string): never => {
-  throw new Error('[cmath10/jmapper] ' + message)
+  throw new Error('[cmath10/js-mapper] ' + message)
 }
 
 const propertyExists = (object: Record<string, unknown>, property: string, message?: string): void => {

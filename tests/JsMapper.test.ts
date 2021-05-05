@@ -190,7 +190,7 @@ describe('JsMapper', () => {
     expect(() => mapper.map('[FilmPayload]', {
       _id: 1,
       _name: 'Star Wars. Episode IV: A New Hope',
-    })).to.throw('[cmath10/jmapper] For array maps source must be an array')
+    })).to.throw('[cmath10/js-mapper] For array maps source must be an array')
   })
 
   test('mapping by setter', () => {
