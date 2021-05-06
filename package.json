@@ -68,5 +68,8 @@
   "homepage": "https://github.com/cmath10/js-mapper#readme",
   "directories": {
     "test": "tests"
+  },
+  "gitHooks": {
+    "pre-commit": "eslint --fix src/** tests/**"
   }
 }
