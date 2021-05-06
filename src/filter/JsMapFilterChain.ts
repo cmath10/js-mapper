@@ -1,11 +1,13 @@
 import JsMapFilter from '@/filter/JsMapFilter'
+import createFilter, { JsMapFilterArgument } from '@/filter/createFilter'
+import { JsMapRecursive } from '@/type'
 
 export default class JsMapFilterChain extends JsMapFilter {
   private _filters: JsMapFilter[] = []
 
-  constructor (filters: JsMapFilter[]) {
+  constructor (filters: JsMapRecursive<JsMapFilterArgument>[]) {
     super()
-    this._filters = filters
+    this._filters = filters.map(f => Array.isArray(f) ? new JsMapFilterChain(f) : createFilter(f))
   }
 
   filter (value: unknown): unknown {

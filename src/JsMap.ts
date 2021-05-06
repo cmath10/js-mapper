@@ -2,26 +2,13 @@ import JsMapCallbackExtractor, { JsMapExtractCallback } from '@/extractor/JsMapC
 import JsMapExtractor from '@/extractor/JsMapExtractor'
 import JsMapPathExtractor from '@/extractor/JsMapPathExtractor'
 
-import JsMapCallbackFilter, { JsMapFilterCallback } from '@/filter/JsMapCallbackFilter'
 import JsMapFilter from '@/filter/JsMapFilter'
 import JsMapFilterChain from '@/filter/JsMapFilterChain'
-import JsMapMappingFilter from '@/filter/JsMapMappingFilter'
+
+import createFilter, { JsMapFilterArgument } from '@/filter/createFilter'
+import { JsMapRecursive } from '@/type'
 
 import JsMapInjector from '@/injector/JsMapInjector'
-
-export type JMapFilterArgument = string | JsMapFilterCallback | JsMapFilter
-
-const _processFilter = (filter: JMapFilterArgument): JsMapFilter => {
-  if (typeof filter === 'string') {
-    return new JsMapMappingFilter(filter)
-  }
-
-  if (typeof filter === 'function') {
-    return new JsMapCallbackFilter(filter)
-  }
-
-  return filter
-}
 
 export default class JsMap {
   private _destination: () => unknown
@@ -60,6 +47,11 @@ export default class JsMap {
     return this._injectors
   }
 
+  /**
+   * Sets callback function will be used to create destination if it not set in mapper ::map method
+   *
+   * @param {() => unknown} destination
+   */
   public destination (destination: () => unknown): JsMap {
     this._destination = destination
     return this
@@ -82,6 +74,7 @@ export default class JsMap {
    *
    * @param {string} destinationMember
    * @param {Function | JsMapExtractor} extractor callback or JMapExtractor instance
+   *
    * @return {this} Current instance of map
    */
   public forMember (destinationMember: string, extractor: JsMapExtractCallback | JsMapExtractor): JsMap {
@@ -98,16 +91,15 @@ export default class JsMap {
    * Applies a filter to the field.
    *
    * @param {string} destinationMember
-   * @param {string | Function | JsMapFilter} filter Map name or callback or filter instance
+   * @param {JsMapRecursive<JsMapFilterArgument>} filter Map name or callback or filter instance
+   *
    * @return {this} Current instance of map
    */
-  public filter (destinationMember: string, filter: JMapFilterArgument | JMapFilterArgument[]): JsMap {
+  public filter (destinationMember: string, filter: JsMapRecursive<JsMapFilterArgument>): JsMap {
     if (Array.isArray(filter)) {
-      this._filters.set(destinationMember, new JsMapFilterChain(
-        filter.map(f => _processFilter(f))
-      ))
+      this._filters.set(destinationMember, new JsMapFilterChain(filter))
     } else {
-      this._filters.set(destinationMember, _processFilter(filter))
+      this._filters.set(destinationMember, createFilter(filter))
     }
 
     return this
@@ -119,7 +111,26 @@ export default class JsMap {
   }
 
   /**
+   * Removes destination member
+   *
+   * @param {string} destinationMember
+   *
+   * @return {this} Current instance of map
+   */
+  public exclude (destinationMember: string): JsMap {
+    [this._extractors, this._filters, this._injectors].forEach(map => {
+      if (map.has(destinationMember)) {
+        map.delete(destinationMember)
+      }
+    })
+
+    return this
+  }
+
+  /**
    * Creates map copy, useful for inherited types
+   *
+   * @return {JsMap}
    */
   public clone (): JsMap {
     const map = new JsMap(this._destination)

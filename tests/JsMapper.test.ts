@@ -1,7 +1,8 @@
 import { expect } from 'chai'
 
-import JsMap from '@/JsMap'
 import JsMapper from '@/JsMapper'
+
+import JsMap from '@/JsMap'
 import JsMapInjector from '@/injector/JsMapInjector'
 
 const toUpperCase = (value: unknown) => {
@@ -47,9 +48,15 @@ describe('JsMapper', () => {
   })
 
   test('mapping with callback extractor', () => {
+    type FilmPayload = {
+      _studio: {
+        name: string;
+      };
+    }
+
     const mapper = new JsMapper()
       .set('FilmPayload', new JsMap()
-        .forMember('studio', (source: any) => source._studio.name)
+        .forMember('studio', (source: unknown) => (source as FilmPayload)._studio.name)
       )
 
     const film = mapper.map('FilmPayload', {
@@ -84,6 +91,28 @@ describe('JsMapper', () => {
         .filter('name', [
           toUpperCase,
           (value: unknown) => '<<' + value + '>>',
+        ])
+      )
+
+    const film = mapper.map('FilmPayload', {
+      _name: 'Star Wars. Episode IV: A New Hope',
+    })
+
+    expect(film).to.deep.equal({
+      name: '<<STAR WARS. EPISODE IV: A NEW HOPE>>',
+    })
+  })
+
+  test('mapping with nested filter chain', () => {
+    const mapper = new JsMapper()
+      .set('FilmPayload', new JsMap()
+        .route('name', '_name')
+        .filter('name', [
+          toUpperCase,
+          [
+            (value: unknown) => '<' + value + '>',
+            (value: unknown) => '<' + value + '>',
+          ],
         ])
       )
 
@@ -196,8 +225,7 @@ describe('JsMapper', () => {
   test('mapping by setter', () => {
     const date = new Date()
     const mapper = new JsMapper()
-      .set('DatePayload', new JsMap()
-        .destination(() => new Date())
+      .set('DatePayload', new JsMap(() => new Date())
         .route('setHours', 'hours')
         .route('setMinutes', 'minutes')
       )
