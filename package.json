@@ -1,6 +1,6 @@
 {
   "name": "@cmath10/js-mapper",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Mapper",
   "main": "dist/js-mapper.umd.js",
   "module": "dist/js-mapper.esm.js",
