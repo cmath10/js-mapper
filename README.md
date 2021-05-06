@@ -88,7 +88,7 @@ import { JsMap } from '@cmath10/js-mapper'
 * `forMember(destinationMember, extractor)` &mdash; sets a custom extractor for a destination member;
 * `filter(destinationMember, filter)` &mdash; sets a custom filter for value processing;
 * `inject(destinationMember, injector)` &mdash; sets a custom injector for a destination member;
-* `exclude (destinationMember)` &mdash; removes destination member from a map;
+* `exclude(destinationMember)` &mdash; removes destination member from a map;
 * `clone()` &mdash; creates copy of map;
 
 ### Extractors
