@@ -83,8 +83,9 @@ JsMap - map class, accumulates mapping information:
 import { JsMap } from '@cmath10/js-mapper'
 ```
 * `destination(destination)` &mdash; sets factory for a destination, default factory is `() => ({})`;
-* `route(destinationMember, sourceMember)` &mdash; sets path extractor by source member; source member could be a deep
-  route like `path.to.source.property`;
+* `route(destinationMember, sourceMember, fallback = undefined)` &mdash; sets path extractor by source member; source
+  member could be a deep route like `path.to.source.property`; if the path is not reachable and fallback is defined,
+  fallback will be used as extracted value;
 * `forMember(destinationMember, extractor)` &mdash; sets a custom extractor for a destination member;
 * `filter(destinationMember, filter)` &mdash; sets a custom filter for value processing;
 * `inject(destinationMember, injector)` &mdash; sets a custom injector for a destination member;
@@ -107,7 +108,8 @@ import {
 implementation). All other extractors should extend this class and implement its `extract` method.
 
 #### JsMapPathExtractor
-Extracts value from source by property path. Throws an error if path is not valid. Used by default.
+Extracts value from source by property path. Throws an error if path is not valid and fallback is undefined. Used by
+default.
 
 #### JsMapCallbackExtractor
 Extracts value by callback function like `(source: unknown) => unknown`:

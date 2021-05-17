@@ -32,6 +32,53 @@ describe('JsMapper', () => {
     })
   })
 
+  test('mapping by route when path not reachable', () => {
+    const mapper = new JsMapper()
+      .set('FilmPayload', new JsMap()
+        .route('id', '_id')
+        .route('name', '_name')
+      )
+
+    expect(() => mapper.map('FilmPayload', {
+      _id: 1,
+    })).to.throw('[cmath10/js-mapper] Path _name is not reachable in the source')
+  })
+
+  test('mapping by route with fallback', () => {
+    const mapper = new JsMapper()
+      .set('FilmPayload', new JsMap()
+        .route('id', '_id')
+        .route('name', '_name', '%not present%')
+      )
+
+    const film = mapper.map('FilmPayload', {
+      _id: 1,
+      _name: 'Star Wars. Episode IV: A New Hope',
+    })
+
+    expect(film).to.deep.equal({
+      id: 1,
+      name: 'Star Wars. Episode IV: A New Hope',
+    })
+  })
+
+  test('mapping by route with fallback when path not reachable', () => {
+    const mapper = new JsMapper()
+      .set('FilmPayload', new JsMap()
+        .route('id', '_id')
+        .route('name', '_name', '%not present%')
+      )
+
+    const film = mapper.map('FilmPayload', {
+      _id: 1,
+    })
+
+    expect(film).to.deep.equal({
+      id: 1,
+      name: '%not present%',
+    })
+  })
+
   test('mapping by deep route', () => {
     const mapper = new JsMapper()
       .set('FilmPayload', new JsMap()

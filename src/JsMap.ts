@@ -62,11 +62,12 @@ export default class JsMap {
    *
    * @param {string} destinationMember
    * @param {string} sourceMember
+   * @param fallback
    *
    * @return {this} Current instance of map
    */
-  public route (destinationMember: string, sourceMember: string): JsMap {
-    return this.forMember(destinationMember, new JsMapPathExtractor(sourceMember))
+  public route (destinationMember: string, sourceMember: string, fallback: unknown = undefined): JsMap {
+    return this.forMember(destinationMember, new JsMapPathExtractor(sourceMember, fallback))
   }
 
   /**

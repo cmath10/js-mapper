@@ -13,7 +13,7 @@ const _extract = (source: Record<string, unknown>, path: string[], prev: string[
   }
 
   const fullPath = [...prev, ...path].join('.')
-  const fullPathNotExist = 'Path ' + fullPath + ' does not exist in the source'
+  const fullPathNotExist = 'Path ' + fullPath + ' is not reachable in the source'
 
   assert.propertyExists(source, path[0], fullPathNotExist)
 
@@ -30,15 +30,25 @@ const _extract = (source: Record<string, unknown>, path: string[], prev: string[
 
 export default class JsMapPathExtractor extends JsMapExtractor {
   private readonly _path: string[]
+  private readonly _fallback: unknown
 
-  constructor (path: string) {
+  constructor (path: string, fallback: unknown = undefined) {
     super()
     this._path = path.split('.')
+    this._fallback = fallback
   }
 
   public extract (source: unknown): unknown {
-    _guard(source, 'Path extracting not available for scalar types')
+    try {
+      _guard(source, 'Path extracting not available for scalar types')
 
-    return _extract(source as Record<string, unknown>, this._path, [])
+      return _extract(source as Record<string, unknown>, this._path, [])
+    } catch (error) {
+      if (this._fallback !== undefined) {
+        return this._fallback
+      }
+
+      throw error
+    }
   }
 }
