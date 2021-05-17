@@ -58,7 +58,7 @@ yarn add @cmath10/js-mapper
 or
 
 ```bash
-npm i @cmath10/js-jmapper
+npm i @cmath10/js-mapper
 ```
 
 ## API
