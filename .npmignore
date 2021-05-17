@@ -8,7 +8,8 @@
 declaration.tsconfig.json
 docker-compose.yml
 jest.config.ts
-Makefile
+tsconfig.json
+/build
 /coverage
 /src
 /tests
