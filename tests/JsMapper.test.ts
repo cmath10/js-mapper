@@ -79,6 +79,27 @@ describe('JsMapper', () => {
     })
   })
 
+  test.each([
+    [() => []],
+    [() => ({})],
+    [() => 'fallback'],
+  ])('mapping by route when path not reachable', (fallback: () => unknown) => {
+    const mapper = new JsMapper()
+      .set('FilmPayload', new JsMap()
+        .route('id', '_id')
+        .route('name', '_name', fallback)
+      )
+
+    const film = mapper.map('FilmPayload', {
+      _id: 1,
+    })
+
+    expect(film).to.deep.equal({
+      id: 1,
+      name: fallback(),
+    })
+  })
+
   test('mapping by deep route', () => {
     const mapper = new JsMapper()
       .set('FilmPayload', new JsMap()

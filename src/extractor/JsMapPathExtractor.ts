@@ -45,7 +45,7 @@ export default class JsMapPathExtractor extends JsMapExtractor {
       return _extract(source as Record<string, unknown>, this._path, [])
     } catch (error) {
       if (this._fallback !== undefined) {
-        return this._fallback
+        return typeof this._fallback === 'function' ? this._fallback() : this._fallback
       }
 
       throw error
