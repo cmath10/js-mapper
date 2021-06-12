@@ -4,5 +4,5 @@ services:
     image: node:12-alpine
     user: node
     volumes:
-      - ./:/var/www/jmapper
-    working_dir: /var/www/jmapper
+      - ./:/var/www/js-mapper
+    working_dir: /var/www/js-mapper
