@@ -14,6 +14,10 @@
     "code:build:umd": "rollup --config build/rollup.config.js --format umd --file dist/js-mapper.umd.js",
     "lint": "eslint src/** tests/**",
     "lint:fix": "eslint --fix src/** tests/**",
+    "release": "standard-version",
+    "release:minor": "standard-version --release-as minor",
+    "release:patch": "standard-version --release-as patch",
+    "release:major": "standard-version --release-as major",
     "test": "jest"
   },
   "keywords": [
@@ -52,6 +56,7 @@
     "rollup-plugin-multi-input": "^1.2.0",
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-typescript2": "^0.30.0",
+    "standard-version": "^9.3.2",
     "ts-jest": "^26.5.4",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.3"
