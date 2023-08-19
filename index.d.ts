@@ -1,3 +1,5 @@
+type Maybe<D> = D extends undefined ? unknown : D
+
 export class JsMapExtractor {
   extract (source: unknown): unknown;
 }
@@ -59,16 +61,16 @@ export class JsMapFilterChain extends JsMapFilter {
   filter (value: unknown): unknown;
 }
 
-export class JsMap {
-  private _destination;
-  private readonly _extractors;
-  private readonly _filters;
-  private readonly _injectors;
+export class JsMap<D = Record<string, unknown>> {
+  private _destination: () => D;
+  private readonly _extractors: Map<string, JsMapExtractor>;
+  private readonly _filters: Map<string, JsMapFilter>;
+  private readonly _injectors: Map<string, JsMapInjector>;
 
   /**
    * @param {() => unknown} destination Defaults to () => ({})
    */
-  constructor (destination?: () => unknown);
+  constructor (destination?: () => D);
 
   /**
    * @internal
@@ -90,7 +92,7 @@ export class JsMap {
    *
    * @param {() => unknown} destination
    */
-  destination (destination: () => unknown): JsMap;
+  destination (destination: () => D): JsMap<D>;
 
   /**
    * Associate a member to another member given their property paths.
@@ -121,42 +123,40 @@ export class JsMap {
    *
    * @return {this} Current instance of map
    */
-  filter(destinationMember: string, filter: JsMapRecursive<JsMapFilterArgument>): JsMap;
+  filter(destinationMember: string, filter: JsMapRecursive<JsMapFilterArgument>): JsMap<D>;
 
-  inject(destinationMember: string, injector: JsMapInjector): JsMap;
+  inject(destinationMember: string, injector: JsMapInjector): JsMap<D>;
 
   /**
    * Removes destination member
-   *
-   * @param {string} destinationMember
-   *
-   * @return {this} Current instance of map
    */
-  exclude(destinationMember: string): JsMap;
+  exclude(destinationMember: string): JsMap<D>;
 
   /**
    * Creates map copy, useful for inherited types
-   *
-   * @return {JsMap}
    */
-  clone(): JsMap;
+  clone(): JsMap<D>;
 
   /**
    * @internal
    */
-  createDestination(): unknown;
+  createDestination(): D;
 }
 
 export default class JsMapper {
-  private _maps;
+  private _maps: Map<string, JsMap<unknown>>;
 
   constructor ();
 
-  get (type: string, clone?: boolean): JsMap;
+  get (type: string, clone?: boolean): JsMap<unknown>;
 
   set (type: string, map: JsMap): JsMapper;
 
   unset (type: string): JsMapper;
 
-  map (typeOrMap: string | JsMap, source: unknown, destination?: unknown): unknown;
+  map<DestinationType = unknown, SourceType = unknown> (
+    typeOrMap: string | JsMap<DestinationType>,
+    source: SourceType,
+    destination?: DestinationType
+  ): Maybe<DestinationType>;
 }

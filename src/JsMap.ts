@@ -10,40 +10,40 @@ import { JsMapRecursive } from '@/type'
 
 import JsMapInjector from '@/injector/JsMapInjector'
 
-export default class JsMap {
-  private _destination: () => unknown
-  private readonly _extractors: Map<string, JsMapExtractor>
-  private readonly _filters: Map<string, JsMapFilter>
-  private readonly _injectors: Map<string, JsMapInjector>
+export default class JsMap<D = Record<string, unknown>> {
+  private _destination: () => D
+  private readonly _extractors: Map<keyof D | string, JsMapExtractor>
+  private readonly _filters: Map<keyof D | string, JsMapFilter>
+  private readonly _injectors: Map<keyof D | string, JsMapInjector>
 
   /**
    * @param {() => unknown} destination Defaults to () => ({})
    */
-  constructor (destination: () => unknown = () => ({})) {
+  constructor (destination: () => D = () => ({} as D)) {
     this._destination = destination
-    this._extractors = new Map<string, JsMapExtractor>()
-    this._filters = new Map<string, JsMapFilter>()
-    this._injectors = new Map<string, JsMapInjector>()
+    this._extractors = new Map<keyof D | string, JsMapExtractor>()
+    this._filters = new Map<keyof D | string, JsMapFilter>()
+    this._injectors = new Map<keyof D | string, JsMapInjector>()
   }
 
   /**
    * @internal
    */
-  public get extractors (): Map<string, JsMapExtractor> {
+  public get extractors (): Map<keyof D | string, JsMapExtractor> {
     return this._extractors
   }
 
   /**
    * @internal
    */
-  public get filters (): Map<string, JsMapFilter> {
+  public get filters (): Map<keyof D | string, JsMapFilter> {
     return this._filters
   }
 
   /**
    * @internal
    */
-  public get injectors (): Map<string, JsMapInjector> {
+  public get injectors (): Map<keyof D | string, JsMapInjector> {
     return this._injectors
   }
 
@@ -52,7 +52,7 @@ export default class JsMap {
    *
    * @param {() => unknown} destination
    */
-  public destination (destination: () => unknown): JsMap {
+  public destination (destination: () => D): JsMap<D> {
     this._destination = destination
     return this
   }
@@ -66,8 +66,15 @@ export default class JsMap {
    *
    * @return {this} Current instance of map
    */
-  public route (destinationMember: string, sourceMember: string, fallback: unknown = undefined): JsMap {
-    return this.forMember(destinationMember, new JsMapPathExtractor(sourceMember, fallback))
+  public route (
+    destinationMember: keyof D | string,
+    sourceMember: string,
+    fallback: unknown = undefined
+  ): JsMap<D> {
+    return this.forMember(
+      destinationMember,
+      new JsMapPathExtractor(sourceMember, fallback)
+    )
   }
 
   /**
@@ -78,7 +85,10 @@ export default class JsMap {
    *
    * @return {this} Current instance of map
    */
-  public forMember (destinationMember: string, extractor: JsMapExtractCallback | JsMapExtractor): JsMap {
+  public forMember (
+    destinationMember: keyof D | string,
+    extractor: JsMapExtractCallback | JsMapExtractor
+  ): JsMap<D> {
     if (typeof extractor === 'function') {
       this._extractors.set(destinationMember, new JsMapCallbackExtractor(extractor))
     } else {
@@ -96,7 +106,10 @@ export default class JsMap {
    *
    * @return {this} Current instance of map
    */
-  public filter (destinationMember: string, filter: JsMapRecursive<JsMapFilterArgument>): JsMap {
+  public filter (
+    destinationMember: keyof D | string,
+    filter: JsMapRecursive<JsMapFilterArgument>
+  ): JsMap<D> {
     if (Array.isArray(filter)) {
       this._filters.set(destinationMember, new JsMapFilterChain(filter))
     } else {
@@ -106,7 +119,7 @@ export default class JsMap {
     return this
   }
 
-  public inject (destinationMember: string, injector: JsMapInjector): JsMap {
+  public inject (destinationMember: keyof D | string, injector: JsMapInjector): JsMap<D> {
     this._injectors.set(destinationMember, injector)
     return this
   }
@@ -118,7 +131,7 @@ export default class JsMap {
    *
    * @return {this} Current instance of map
    */
-  public exclude (destinationMember: string): JsMap {
+  public exclude (destinationMember: keyof D | string): JsMap<D> {
     [this._extractors, this._filters, this._injectors].forEach(map => {
       if (map.has(destinationMember)) {
         map.delete(destinationMember)
@@ -133,7 +146,7 @@ export default class JsMap {
    *
    * @return {JsMap}
    */
-  public clone (): JsMap {
+  public clone (): JsMap<D> {
     const map = new JsMap(this._destination)
 
     this._extractors.forEach((extractor, path) => {
@@ -147,10 +160,14 @@ export default class JsMap {
     return map
   }
 
+  public extend<E extends D>(): JsMap<E> {
+    return this.clone() as unknown as JsMap<E>
+  }
+
   /**
    * @internal
    */
-  public createDestination (): unknown {
+  public createDestination (): D {
     return this._destination()
   }
 }

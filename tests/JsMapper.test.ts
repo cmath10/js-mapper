@@ -215,13 +215,15 @@ describe('JsMapper', () => {
   })
 
   test('array mapping', () => {
+    type Film = { id: number; name: string }
+
     const mapper = new JsMapper()
-      .set('FilmPayload', new JsMap()
+      .set('FilmPayload', new JsMap<Film>()
         .route('id', '_id')
         .route('name', '_name')
       )
 
-    const collection = mapper.map('[FilmPayload]', [{
+    const collection = mapper.map<Film[]>('[FilmPayload]', [{
       _id: 1,
       _name: 'Star Wars. Episode IV: A New Hope',
     }, {
@@ -239,22 +241,29 @@ describe('JsMapper', () => {
   })
 
   test('nested array mapping', () => {
+    type Studio = { name: string }
+    type Film = { id: number; name: string }
+    type FilmCollection = {
+      studio: Studio;
+      films: Film[]
+    }
+
     const mapper = new JsMapper()
-      .set('StudioPayload', new JsMap()
+      .set('StudioPayload', new JsMap<Studio>()
         .route('name', '_name')
       )
-      .set('FilmPayload', new JsMap()
+      .set('FilmPayload', new JsMap<Film>()
         .route('id', '_id')
         .route('name', '_name')
       )
-      .set('FilmCollectionPayload', new JsMap()
+      .set('FilmCollectionPayload', new JsMap<FilmCollection>()
         .route('studio', '_studio')
         .filter('studio', 'StudioPayload')
         .route('films', '_films')
         .filter('films', '[FilmPayload]')
       )
 
-    const collection = mapper.map('FilmCollectionPayload', {
+    const collection = mapper.map<FilmCollection>('FilmCollectionPayload', {
       _studio: { _name: 'Lucasfilm Ltd. LLC' },
       _films: [{
         _id: 1,
@@ -293,7 +302,7 @@ describe('JsMapper', () => {
   test('mapping by setter', () => {
     const date = new Date()
     const mapper = new JsMapper()
-      .set('DatePayload', new JsMap(() => new Date())
+      .set('DatePayload', new JsMap<Date>(() => new Date())
         .route('setHours', 'hours')
         .route('setMinutes', 'minutes')
       )
@@ -311,7 +320,7 @@ describe('JsMapper', () => {
   test('mapping by custom injector', () => {
     const date = new Date()
     const mapper = new JsMapper()
-      .set('DatePayload', new JsMap()
+      .set('DatePayload', new JsMap<Date>()
         .destination(() => new Date())
         .route('setHours', 'hours')
         .route('minutes', 'minutes')
